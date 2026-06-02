@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroFinance CI Platform</title>
+    <!-- CSS link -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Main Header -->
+    <header class="glass-card" style="border-radius: 0; margin-bottom: 0;">
+        <div class="container nav-wrapper">
+            <div class="logo">
+                <i class="fa-solid fa-building-columns"></i>
+                MicroFinance CI <span>v1.0</span>
+            </div>
+            
+            <div class="nav-right" id="nav-authenticated" style="display: none;">
+                <!-- Notification Bell -->
+                <div class="notification-bell" onclick="toggleNotifications()">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notification-badge" id="notif-count" style="display: none;">0</span>
+                    
+                    <!-- Notification List Dropdown -->
+                    <div class="notif-dropdown glass-card" id="notif-dropdown">
+                        <div style="padding: 12px 16px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-weight: 700;">
+                            <span>Notifications</span>
+                            <a href="#" onclick="markAllNotificationsRead(event)" style="font-size: 11px; color: var(--primary-light);">Tout lire</a>
+                        </div>
+                        <div id="notif-list-container">
+                            <!-- Injected dynamically -->
+                            <div style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune notification</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile Info -->
+                <div class="user-menu">
+                    <div class="user-avatar" id="user-avatar-initials">U</div>
+                    <div style="text-align: left;">
+                        <div style="font-weight: 700;" id="user-display-name">Username</div>
+                        <span class="role-badge" id="user-display-role">Client</span>
+                    </div>
+                    <button class="btn btn-outline" style="padding: 8px 12px;" onclick="handleLogout()">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Viewport -->
+    <main class="container">
+        
+        <!-- ================= AUTH VIEW ================= -->
+        <section id="auth-view" class="auth-container glass-card">
+            <div class="auth-header">
+                <h2>Bienvenue</h2>
+                <p id="auth-subtitle">Connectez-vous pour accéder à votre espace</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-username">Nom d'utilisateur</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="Entrez votre nom d'utilisateur" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Mot de passe</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Entrez votre mot de passe" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    <i class="fa-solid fa-right-to-bracket"></i> Se connecter
+                </button>
+                
+                <p style="text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 13px;">
+                    Pas encore de compte ? <a href="#" onclick="toggleAuthForm(event, 'register')">Créer un compte</a>
+                </p>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" onsubmit="handleRegister(event)" style="display: none;">
+                <div class="form-group">
+                    <label for="reg-username">Nom d'utilisateur</label>
+                    <input type="text" id="reg-username" class="form-control" placeholder="Ex: amadou_kone" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">Adresse e-mail</label>
+                    <input type="email" id="reg-email" class="form-control" placeholder="Ex: amadou@gmail.com" required>
+                </div>
+                <div class="grid-split-2">
+                    <div class="form-group">
+                        <label for="reg-role">Rôle souhaité</label>
+                        <select id="reg-role" class="form-control" required>
+                            <option value="CLIENT">Client</option>
+                            <option value="AGENT">Agent de Crédit</option>
+                            <option value="ADMIN">Administrateur</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-region">Région</label>
+                        <input type="text" id="reg-region" class="form-control" placeholder="Ex: Abidjan" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-phone">Numéro de téléphone</label>
+                    <input type="text" id="reg-phone" class="form-control" placeholder="Ex: +225 07080910" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Mot de passe</label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="Créez un mot de passe fort" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    <i class="fa-solid fa-user-plus"></i> Créer mon compte
+                </button>
+                
+                <p style="text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 13px;">
+                    Déjà un compte ? <a href="#" onclick="toggleAuthForm(event, 'login')">Se connecter</a>
+                </p>
+            </form>
+        </section>
+
+        <!-- ================= MAIN PORTAL VIEW ================= -->
+        <section id="portal-view" class="dashboard-grid" style="display: none;">
+            
+            <!-- Sidebar Navigation -->
+            <aside class="glass-card sidebar">
+                <!-- CLIENT SIDEBAR OPTIONS -->
+                <div id="sidebar-client-group" style="display: none;">
+                    <button class="sidebar-btn active" onclick="switchSection('client-dashboard')">
+                        <i class="fa-solid fa-chart-pie"></i> Mon Tableau de bord
+                    </button>
+                    <button class="sidebar-btn" onclick="switchSection('client-loans')">
+                        <i class="fa-solid fa-wallet"></i> Mes Microcrédits
+                    </button>
+                    <button class="sidebar-btn" onclick="switchSection('client-insurance')">
+                        <i class="fa-solid fa-shield-halved"></i> Assurances Mobiles
+                    </button>
+                </div>
+
+                <!-- AGENT SIDEBAR OPTIONS -->
+                <div id="sidebar-agent-group" style="display: none;">
+                    <button class="sidebar-btn active" onclick="switchSection('agent-dashboard')">
+                        <i class="fa-solid fa-folder-open"></i> Gérer les Crédits
+                    </button>
+                    <button class="sidebar-btn" onclick="switchSection('agent-chats')">
+                        <i class="fa-solid fa-comments"></i> Centre de Support <span class="badge" id="agent-chat-badge" style="background: var(--danger); font-size: 9px; padding: 2px 6px; border-radius: 10px; margin-left: 5px; display: none;">0</span>
+                    </button>
+                </div>
+
+                <!-- ADMIN SIDEBAR OPTIONS -->
+                <div id="sidebar-admin-group" style="display: none;">
+                    <button class="sidebar-btn active" onclick="switchSection('admin-dashboard')">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard Admin
+                    </button>
+                </div>
+            </aside>
+
+            <!-- Main Panel Space -->
+            <div class="main-content">
+
+                <!-- 1. CLIENT DASHBOARD VIEW -->
+                <div id="client-dashboard" class="dashboard-view active">
+                    <h2 style="margin-bottom: 20px;">Mon Tableau de bord</h2>
+                    
+                    <!-- Stats Widgets -->
+                    <div class="widgets-grid">
+                        <div class="glass-card widget-card">
+                            <div class="widget-header">
+                                <span>CRÉDITS EN COURS</span>
+                                <i class="fa-solid fa-circle-dollar-to-slot" style="color: var(--primary-light);"></i>
+                            </div>
+                            <div class="widget-val" id="widget-active-loans">0</div>
+                            <div class="widget-footer">Demandes approuvées / décaissées</div>
+                        </div>
+                        <div class="glass-card widget-card">
+                            <div class="widget-header">
+                                <span>SOLDE RESTANT DÛ</span>
+                                <i class="fa-solid fa-hand-holding-dollar" style="color: var(--warning);"></i>
+                            </div>
+                            <div class="widget-val" id="widget-remaining-due">0 FCFA</div>
+                            <div class="widget-footer">Capital + Intérêts restants</div>
+                        </div>
+                        <div class="glass-card widget-card">
+                            <div class="widget-header">
+                                <span>SCORE D'ÉLIGIBILITÉ</span>
+                                <i class="fa-solid fa-gauge-high" style="color: var(--success);"></i>
+                            </div>
+                            <div class="widget-val" id="widget-eligibility-score">50/100</div>
+                            <div class="widget-footer">Mise à jour automatique</div>
+                        </div>
+                    </div>
+
+                    <!-- Client Recent Loans & Repayments -->
+                    <div class="glass-card" style="padding: 24px; margin-bottom: 30px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3>Dernière demande de microcrédit</h3>
+                            <button class="btn btn-primary" onclick="openModal('loan-modal')">
+                                <i class="fa-solid fa-plus"></i> Nouvelle demande
+                            </button>
+                        </div>
+                        
+                        <div id="client-active-loan-container">
+                            <!-- Injected dynamically -->
+                            <div style="padding: 30px; text-align: center; color: var(--text-muted);">
+                                Aucun crédit actif. Cliquez sur "Nouvelle demande" pour soumettre un dossier.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CLIENT LOANS WORKSPACE -->
+                <div id="client-loans" class="dashboard-view">
+                    <h2 style="margin-bottom: 20px;">Historique de mes Microcrédits</h2>
+                    <div class="glass-card" style="padding: 24px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Score</th>
+                                        <th>Intérêt</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="client-loans-table-body">
+                                    <!-- Injected dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. CLIENT INSURANCE CATALOG -->
+                <div id="client-insurance" class="dashboard-view">
+                    <h2 style="margin-bottom: 20px;">Assurances Mobiles</h2>
+                    
+                    <!-- Subscribed active insurances -->
+                    <div class="glass-card" style="padding: 24px; margin-bottom: 30px;">
+                        <h3>Mes assurances actives</h3>
+                        <div class="table-container" style="margin-top: 15px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Formule</th>
+                                        <th>Date Début</th>
+                                        <th>Date Fin</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="client-subscriptions-table-body">
+                                    <!-- Injected dynamically -->
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--text-muted);">Aucun contrat actif</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Catalog -->
+                    <h3 style="margin-bottom: 15px;">Formules d'Assurance Disponibles</h3>
+                    <div class="insurance-grid" id="insurance-catalog-container">
+                        <!-- Injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- 4. AGENT DASHBOARD VIEW -->
+                <div id="agent-dashboard" class="dashboard-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Gestion des dossiers de microcrédits</h2>
+                        <button class="btn btn-primary" onclick="openModal('payment-modal')">
+                            <i class="fa-solid fa-credit-card"></i> Enregistrer un Paiement
+                        </button>
+                    </div>
+
+                    <div class="glass-card" style="padding: 24px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Client</th>
+                                        <th>Région</th>
+                                        <th>Montant</th>
+                                        <th>Score</th>
+                                        <th>Statut</th>
+                                        <th>Action / Changement Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="agent-loans-table-body">
+                                    <!-- Injected dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. AGENT CHAT CENTER -->
+                <div id="agent-chats" class="dashboard-view">
+                    <h2 style="margin-bottom: 20px;">Centre de Support Client</h2>
+                    <div class="glass-card chat-center">
+                        <!-- Conversations list -->
+                        <div class="chat-sidebar" id="agent-chats-list">
+                            <!-- Injected dynamically -->
+                            <div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 13px;">Aucune conversation</div>
+                        </div>
+                        
+                        <!-- Selected chat box -->
+                        <div style="display: flex; flex-direction: column; height: 100%;">
+                            <div class="chat-header" style="background: transparent;">
+                                <div>
+                                    <span style="font-weight: 700;" id="agent-chat-client-name">Sélectionnez un client</span>
+                                    <span class="agent-presence-indicator" id="agent-chat-client-presence"></span>
+                                </div>
+                                <button class="btn btn-outline" style="padding: 6px 12px; font-size: 12px;" onclick="closeActiveChatByAgent()" id="agent-close-chat-btn" disabled>
+                                    Fermer la session
+                                </button>
+                            </div>
+                            
+                            <!-- Chat Area -->
+                            <div class="chat-messages" id="agent-chat-messages-container" style="background: rgba(0,0,0,0.15);">
+                                <div style="margin: auto; color: var(--text-muted); text-align: center;">
+                                    <i class="fa-regular fa-comments" style="font-size: 48px; margin-bottom: 12px; display: block; color: var(--text-muted);"></i>
+                                    Choisissez une conversation dans la liste pour commencer
+                                </div>
+                            </div>
+                            
+                            <div class="chat-typing-indicator" id="agent-chat-typing-indicator"></div>
+                            
+                            <div class="chat-input-area">
+                                <input type="text" id="agent-chat-input" class="form-control" placeholder="Tapez votre message..." disabled oninput="sendTypingIndicator('agent')">
+                                <button class="btn btn-primary" onclick="sendMessageByAgent()" id="agent-chat-send-btn" disabled>
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. ADMIN DASHBOARD VIEW -->
+                <div id="admin-dashboard" class="dashboard-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Tableau de bord Administrateur</h2>
+                        <button class="btn btn-outline" onclick="triggerDailyAlerts()" title="Simuler l'exécution du cron journalier d'alertes">
+                            <i class="fa-solid fa-bell"></i> Déclencher Alertes (J-3/J+1/J-15)
+                        </button>
+                    </div>
+                    
+                    <!-- Filters Panel -->
+                    <div class="glass-card" style="padding: 20px; margin-bottom: 30px;">
+                        <h4 style="margin-bottom: 15px;"><i class="fa-solid fa-filter"></i> Filtres globaux</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) 120px; gap: 15px; align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="margin-bottom: 5px;">Date Début</label>
+                                <input type="date" id="admin-filter-start" class="form-control">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="margin-bottom: 5px;">Date Fin</label>
+                                <input type="date" id="admin-filter-end" class="form-control">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="margin-bottom: 5px;">Région</label>
+                                <input type="text" id="admin-filter-region" class="form-control" placeholder="Ex: Abidjan">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="margin-bottom: 5px;">Agent ID</label>
+                                <input type="number" id="admin-filter-agent" class="form-control" placeholder="ID de l'agent">
+                            </div>
+                            <button class="btn btn-primary" onclick="loadAdminStats()" style="width: 100%;">Filtrer</button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Widgets -->
+                    <div class="widgets-grid">
+                        <div class="glass-card widget-card">
+                            <div class="widget-header">
+                                <span>TAUX DE RECOUVREMENT</span>
+                                <i class="fa-solid fa-chart-bar" style="color: var(--success);"></i>
+                            </div>
+                            <div class="widget-val" id="admin-widget-recovery-rate">0%</div>
+                            <div class="widget-footer" id="admin-widget-recovery-details">0 / 0 FCFA</div>
+                        </div>
+                        <div class="glass-card widget-card">
+                            <div class="widget-header">
+                                <span>SOUSCRIPTIONS ACTIVES</span>
+                                <i class="fa-solid fa-shield-halved" style="color: var(--primary-light);"></i>
+                            </div>
+                            <div class="widget-val" id="admin-widget-insurance">0</div>
+                            <div class="widget-footer">Formules d'assurances mobiles</div>
+                        </div>
+                        <div class="glass-card widget-card">
+                            <div class="widget-header">
+                                <span>CHATS SUPPORT OUVERTS</span>
+                                <i class="fa-solid fa-comment-dots" style="color: var(--warning);"></i>
+                            </div>
+                            <div class="widget-val" id="admin-widget-chats">0</div>
+                            <div class="widget-footer">Conversations en attente</div>
+                        </div>
+                    </div>
+
+                    <!-- Volume par statut & Détails -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                        <div class="glass-card" style="padding: 24px;">
+                            <h3>Demandes de crédit par statut</h3>
+                            <div style="margin-top: 20px;" id="admin-volume-status-container">
+                                <!-- Injected dynamically -->
+                            </div>
+                        </div>
+                        
+                        <div class="glass-card" style="padding: 24px;">
+                            <h3>Indicateurs de Performance</h3>
+                            <div style="margin-top: 20px;">
+                                <div class="metric-row">
+                                    <div class="metric-lbl">
+                                        <span>Indice de confiance des remboursements</span>
+                                        <span id="trust-indicator-pct">0%</span>
+                                    </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill" id="trust-indicator-bar" style="width: 0%;"></div>
+                                    </div>
+                                </div>
+                                <div class="metric-row">
+                                    <div class="metric-lbl">
+                                        <span>Région la plus active</span>
+                                        <span id="region-active-lbl">N/A</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <!-- ================= CLIENT CHAT WIDGET BOX ================= -->
+    <div id="client-chat-widget-container" style="display: none;">
+        <button class="support-widget-btn" onclick="toggleClientChatBox()">
+            <i class="fa-solid fa-comment-dots"></i>
+        </button>
+        
+        <div class="chat-box glass-card" id="client-chat-box">
+            <div class="chat-header">
+                <div>
+                    <span style="font-weight: 700;">Support Client</span>
+                    <span class="agent-presence-indicator" id="client-chat-agent-presence"></span>
+                    <span style="font-size: 11px; color: var(--text-secondary); display: block;" id="client-chat-agent-name">Agent assigné : Aucun</span>
+                </div>
+                <button class="modal-close" style="font-size: 18px;" onclick="toggleClientChatBox()">&times;</button>
+            </div>
+            
+            <div class="chat-messages" id="client-chat-messages-container">
+                <!-- Injected dynamically -->
+                <div style="margin: auto; text-align: center; color: var(--text-muted); padding: 20px;">
+                    Bonjour ! Besoin d'assistance ?
+                    <button class="btn btn-outline" style="margin-top: 15px; font-size: 12px; padding: 6px 12px;" onclick="startNewChatSession()">
+                        Ouvrir un chat
+                    </button>
+                </div>
+            </div>
+            
+            <div class="chat-typing-indicator" id="client-chat-typing-indicator"></div>
+            
+            <div class="chat-input-area" id="client-chat-input-area" style="display: none;">
+                <input type="text" id="client-chat-input" class="form-control" placeholder="Votre message..." oninput="sendTypingIndicator('client')">
+                <button class="btn btn-primary" onclick="sendMessageByClient()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+    <!-- 1. Loan Request Modal -->
+    <div class="modal" id="loan-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Demander un microcrédit</h3>
+                <button class="modal-close" onclick="closeModal('loan-modal')">&times;</button>
+            </div>
+            <form id="loan-form" onsubmit="submitLoanRequest(event)">
+                <div class="form-group">
+                    <label for="loan-amount">Montant demandé (FCFA)</label>
+                    <input type="number" id="loan-amount" class="form-control" placeholder="Ex: 250000" required>
+                </div>
+                <div class="form-group">
+                    <label for="loan-reason">Motif / Justification d'utilisation</label>
+                    <textarea id="loan-reason" class="form-control" rows="4" placeholder="Décrivez l'utilisation du financement..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="loan-file">Pièce justificative (Fichier PDF/Image)</label>
+                    <input type="file" id="loan-file" class="form-control">
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('loan-modal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Soumettre le dossier</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Record Payment Modal -->
+    <div class="modal" id="payment-modal">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Enregistrer un Remboursement</h3>
+                <button class="modal-close" onclick="closeModal('payment-modal')">&times;</button>
+            </div>
+            <form id="payment-form" onsubmit="submitPayment(event)">
+                <div class="form-group">
+                    <label for="payment-loan-id">ID du Crédit Décaissé</label>
+                    <input type="number" id="payment-loan-id" class="form-control" placeholder="Ex: 1" required>
+                </div>
+                <div class="form-group">
+                    <label for="payment-amount">Montant du Paiement (FCFA)</label>
+                    <input type="number" id="payment-amount" class="form-control" placeholder="Ex: 82500" required>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('payment-modal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer Paiement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        // Global variables & state
+        const API_URL = '/api';
+        let currentUser = null;
+        let activeChatSession = null;
+        let chatSocket = null;
+        let typingTimeout = null;
+
+        // Custom API Fetch Wrapper (with automatic JWT header and token refreshing!)
+        async function apiFetch(endpoint, options = {}) {
+            let token = localStorage.getItem('accessToken');
+            
+            // Set Headers
+            options.headers = options.headers || {};
+            if (token) {
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            let response = await fetch(`${API_URL}${endpoint}`, options);
+
+            // Handle Unauthorized (Access token expired)
+            if (response.status === 401 && localStorage.getItem('refreshToken')) {
+                console.log("Access token expired, attempting to refresh...");
+                const refreshed = await attemptTokenRefresh();
+                
+                if (refreshed) {
+                    // Retry original request with new token
+                    token = localStorage.getItem('accessToken');
+                    options.headers['Authorization'] = `Bearer ${token}`;
+                    response = await fetch(`${API_URL}${endpoint}`, options);
+                } else {
+                    // Refresh token invalid, log out
+                    handleLogout();
+                    throw new Error("Session expirée. Veuillez vous reconnecter.");
+                }
+            }
+
+            return response;
+        }
+
+        async function attemptTokenRefresh() {
+            const refresh = localStorage.getItem('refreshToken');
+            if (!refresh) return false;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/refresh/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refresh })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('accessToken', data.access);
+                    if (data.refresh) {
+                        localStorage.setItem('refreshToken', data.refresh);
+                    }
+                    console.log("Token refreshed successfully.");
+                    return true;
+                }
+            } catch (err) {
+                console.error("Error refreshing token:", err);
+            }
+            return false;
+        }
+
+        // Auth Forms UI Switcher
+        function toggleAuthForm(e, mode) {
+            e.preventDefault();
+            const subtitle = document.getElementById('auth-subtitle');
+            const loginForm = document.getElementById('login-form');
+            const regForm = document.getElementById('register-form');
+            
+            if (mode === 'register') {
+                subtitle.innerText = "Créez votre compte en quelques secondes";
+                loginForm.style.display = 'none';
+                regForm.style.display = 'block';
+            } else {
+                subtitle.innerText = "Connectez-vous pour accéder à votre espace";
+                loginForm.style.display = 'block';
+                regForm.style.display = 'none';
+            }
+        }
+
+        // Login Handler
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('accessToken', data.access);
+                    localStorage.setItem('refreshToken', data.refresh);
+                    
+                    // Fetch Profile and redirect
+                    await loadUserProfile();
+                } else {
+                    const errData = await response.json();
+                    alert(`Erreur de connexion : ${errData.detail || 'Identifiants incorrects'}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur de connexion serveur.");
+            }
+        }
+
+        // Register Handler
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const role = document.getElementById('reg-role').value;
+            const region = document.getElementById('reg-region').value;
+            const phone = document.getElementById('reg-phone').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, role, region, phone, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('accessToken', data.access);
+                    localStorage.setItem('refreshToken', data.refresh);
+                    
+                    alert("Compte créé avec succès ! Connecté automatiquement.");
+                    await loadUserProfile();
+                } else {
+                    const errData = await response.json();
+                    alert(`Erreur d'inscription : ${JSON.stringify(errData)}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur d'inscription serveur.");
+            }
+        }
+
+        // Load authenticated User Profile
+        async function loadUserProfile() {
+            try {
+                const response = await apiFetch('/profile/');
+                if (response.ok) {
+                    currentUser = await response.json();
+                    renderAuthenticatedUI();
+                } else {
+                    handleLogout();
+                }
+            } catch (err) {
+                console.error(err);
+                handleLogout();
+            }
+        }
+
+        // Render UI after authentication
+        function renderAuthenticatedUI() {
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('nav-authenticated').style.display = 'flex';
+            document.getElementById('portal-view').style.display = 'grid';
+
+            // Set user profile visuals
+            document.getElementById('user-display-name').innerText = currentUser.username;
+            document.getElementById('user-display-role').innerText = getRoleLabel(currentUser.role);
+            document.getElementById('user-avatar-initials').innerText = currentUser.username.slice(0, 2).toUpperCase();
+
+            // Set Role Badge Color Class
+            const roleBadge = document.getElementById('user-display-role');
+            roleBadge.className = 'role-badge';
+            roleBadge.classList.add(`role-${currentUser.role.toLowerCase()}`);
+
+            // Show/Hide Sidebar Groups
+            document.getElementById('sidebar-client-group').style.display = currentUser.role === 'CLIENT' ? 'block' : 'none';
+            document.getElementById('sidebar-agent-group').style.display = currentUser.role === 'AGENT' ? 'block' : 'none';
+            document.getElementById('sidebar-admin-group').style.display = currentUser.role === 'ADMIN' ? 'block' : 'none';
+
+            // Show chat widget for clients, hide for agents/admins (who use Chat Center)
+            document.getElementById('client-chat-widget-container').style.display = currentUser.role === 'CLIENT' ? 'block' : 'none';
+
+            // Open Default Tab depending on Role
+            if (currentUser.role === 'CLIENT') {
+                switchSection('client-dashboard');
+            } else if (currentUser.role === 'AGENT') {
+                switchSection('agent-dashboard');
+            } else if (currentUser.role === 'ADMIN') {
+                switchSection('admin-dashboard');
+            }
+
+            // Load recurring data (notifications, stats)
+            loadNotifications();
+            setInterval(loadNotifications, 30000); // refresh notifs every 30s
+        }
+
+        // Helper roles
+        function getRoleLabel(role) {
+            switch(role) {
+                case 'CLIENT': return 'Client';
+                case 'AGENT': return 'Agent de Crédit';
+                case 'ADMIN': return 'Administrateur';
+                default: return role;
+            }
+        }
+
+        // Logout
+        function handleLogout() {
+            localStorage.clear();
+            currentUser = null;
+            if (chatSocket) {
+                chatSocket.close();
+            }
+            document.getElementById('nav-authenticated').style.display = 'none';
+            document.getElementById('portal-view').style.display = 'none';
+            document.getElementById('auth-view').style.display = 'block';
+            document.getElementById('client-chat-widget-container').style.display = 'none';
+            
+            // Clear inputs
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            toggleAuthForm({preventDefault: () => {}}, 'login');
+        }
+
+        // Navigation Sections Switcher
+        function switchSection(sectionId) {
+            // Hide all views
+            const views = document.querySelectorAll('.dashboard-view');
+            views.forEach(v => v.classList.remove('active'));
+
+            // Deactivate all sidebar buttons
+            const sBtns = document.querySelectorAll('.sidebar-btn');
+            sBtns.forEach(btn => btn.classList.remove('active'));
+
+            // Activate target view
+            const targetView = document.getElementById(sectionId);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
+
+            // Activate button
+            const activeBtn = Array.from(sBtns).find(btn => btn.getAttribute('onclick').includes(sectionId));
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+
+            // Route view loaded logic
+            if (sectionId === 'client-dashboard') {
+                loadClientDashboardData();
+            } else if (sectionId === 'client-loans') {
+                loadClientLoans();
+            } else if (sectionId === 'client-insurance') {
+                loadInsuranceCatalog();
+            } else if (sectionId === 'agent-dashboard') {
+                loadAgentLoans(); // uses /api/credits/
+            } else if (sectionId === 'agent-chats') {
+                loadAgentChatsCenter();
+            } else if (sectionId === 'admin-dashboard') {
+                loadAdminStats();
+            }
+        }
+
+        // ================= CLIENT DASHBOARD & LOANS =================
+
+        async function loadClientDashboardData() {
+            try {
+                const response = await apiFetch('/credits/');
+                if (response.ok) {
+                    const loans = await response.json();
+                    
+                    // Filter active loans (approuvée or décaissée)
+                    const activeLoans = loans.filter(l => ['APPROUVEE', 'DECAISSEE'].includes(l.status));
+                    document.getElementById('widget-active-loans').innerText = activeLoans.length;
+
+                    // Remaining due
+                    let totalRemaining = 0;
+                    activeLoans.forEach(l => {
+                        l.installments.forEach(i => {
+                            if (!i.is_paid) {
+                                totalRemaining += parseFloat(i.amount_due) - parseFloat(i.amount_paid);
+                            }
+                        });
+                    });
+                    document.getElementById('widget-remaining-due').innerText = `${totalRemaining.toLocaleString()} FCFA`;
+
+                    // Eligibility Score
+                    // Get latest loan eligibility score or defaults
+                    if (loans.length > 0) {
+                        const latest = loans[0];
+                        document.getElementById('widget-eligibility-score').innerText = `${latest.eligibility_score}/100`;
+                    } else {
+                        document.getElementById('widget-eligibility-score').innerText = '50/100';
+                    }
+
+                    // Render active loan container detail
+                    const container = document.getElementById('client-active-loan-container');
+                    if (loans.length > 0) {
+                        const l = loans[0]; // latest loan
+                        
+                        let installmentHtml = '';
+                        if (l.installments && l.installments.length > 0) {
+                            installmentHtml = `
+                                <h4 style="margin-top: 15px; margin-bottom: 10px;">Échéancier de remboursements</h4>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Date Due</th>
+                                                <th>Montant Dû</th>
+                                                <th>Montant Payé</th>
+                                                <th>Statut</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${l.installments.map(inst => `
+                                                <tr>
+                                                    <td>${inst.due_date}</td>
+                                                    <td>${parseFloat(inst.amount_due).toLocaleString()} FCFA</td>
+                                                    <td>${parseFloat(inst.amount_paid).toLocaleString()} FCFA</td>
+                                                    <td>
+                                                        <span class="status-pill ${inst.is_paid ? 'status-decaissee' : 'status-approuvee'}">
+                                                            ${inst.is_paid ? 'Payé' : 'Non payé'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
+                        } else {
+                            installmentHtml = `<p style="font-size: 13px; color: var(--text-secondary); margin-top: 15px;">Échéancier non encore généré (En attente d'approbation).</p>`;
+                        }
+
+                        container.innerHTML = `
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <p style="color: var(--text-muted); font-size: 13px;">ID de la demande : #${l.id}</p>
+                                    <h4 style="font-size: 20px; margin: 5px 0;">${parseFloat(l.amount).toLocaleString()} FCFA</h4>
+                                    <p style="color: var(--text-secondary); font-size: 13px;">Motif : ${l.reason}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span class="status-pill status-${l.status.toLowerCase()}">${getLoanStatusLabel(l.status)}</span>
+                                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">Score d'éligibilité calculé : <strong>${l.eligibility_score}/100</strong></p>
+                                </div>
+                            </div>
+                            ${installmentHtml}
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div style="padding: 30px; text-align: center; color: var(--text-muted);">
+                                Aucun crédit actif. Cliquez sur "Nouvelle demande" pour soumettre un dossier.
+                            </div>
+                        `;
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadClientLoans() {
+            try {
+                const response = await apiFetch('/credits/');
+                if (response.ok) {
+                    const loans = await response.json();
+                    const body = document.getElementById('client-loans-table-body');
+                    
+                    if (loans.length === 0) {
+                        body.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Aucun crédit enregistré</td></tr>`;
+                        return;
+                    }
+
+                    body.innerHTML = loans.map(l => `
+                        <tr>
+                            <td>#${l.id}</td>
+                            <td>${new Date(l.created_at).toLocaleDateString()}</td>
+                            <td><strong>${parseFloat(l.amount).toLocaleString()} FCFA</strong></td>
+                            <td><span class="status-pill status-${l.status.toLowerCase()}">${getLoanStatusLabel(l.status)}</span></td>
+                            <td>${l.eligibility_score}/100</td>
+                            <td>${l.interest_rate}%</td>
+                            <td>
+                                <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px;" onclick="loadAndShowLoanDetails(${l.id})">
+                                    <i class="fa-solid fa-eye"></i> Échéances
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function getLoanStatusLabel(status) {
+            switch(status) {
+                case 'SOUMISE': return 'Soumise';
+                case 'EN_ANALYSE': return 'En analyse';
+                case 'APPROUVEE': return 'Approuvée';
+                case 'DECAISSEE': return 'Décaissée';
+                default: return status;
+            }
+        }
+
+        // Submit new loan request
+        async function submitLoanRequest(e) {
+            e.preventDefault();
+            const amount = document.getElementById('loan-amount').value;
+            const reason = document.getElementById('loan-reason').value;
+            const fileInput = document.getElementById('loan-file');
+            
+            // Build Form Data (since we have a file upload)
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('reason', reason);
+            if (fileInput.files.length > 0) {
+                formData.append('supporting_document', fileInput.files[0]);
+            }
+
+            try {
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(`${API_URL}/credits/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert("Demande de microcrédit soumise avec succès !");
+                    closeModal('loan-modal');
+                    // Reset fields
+                    document.getElementById('loan-amount').value = '';
+                    document.getElementById('loan-reason').value = '';
+                    document.getElementById('loan-file').value = '';
+                    
+                    loadClientDashboardData();
+                } else {
+                    const errData = await response.json();
+                    alert(`Erreur : ${JSON.stringify(errData)}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur lors de l'envoi de la demande.");
+            }
+        }
+
+        // Detail viewer for client loans
+        function loadAndShowLoanDetails(loanId) {
+            switchSection('client-dashboard');
+            // This will load the latest active loan anyway, or we could customize it to load specific ID
+        }
+
+        // ================= CLIENT INSURANCE CATALOG & SUB =================
+
+        async function loadInsuranceCatalog() {
+            try {
+                // Load Active client subscriptions first
+                const subResponse = await apiFetch('/insurance/my-policies/');
+                if (subResponse.ok) {
+                    const subs = await subResponse.json();
+                    const subBody = document.getElementById('client-subscriptions-table-body');
+                    
+                    if (subs.length === 0) {
+                        subBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Aucune police active</td></tr>`;
+                    } else {
+                        subBody.innerHTML = subs.map(s => `
+                            <tr>
+                                <td>#${s.id}</td>
+                                <td><strong>${s.product_details.name}</strong></td>
+                                <td>${s.start_date}</td>
+                                <td>${s.end_date}</td>
+                                <td><span class="status-pill status-decaissee">${s.is_active ? 'Active' : 'Expirée'}</span></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+
+                // Load Catalog products
+                const prodResponse = await apiFetch('/insurance/products/');
+                if (prodResponse.ok) {
+                    const prods = await prodResponse.json();
+                    const catalogContainer = document.getElementById('insurance-catalog-container');
+                    
+                    catalogContainer.innerHTML = prods.map(p => `
+                        <div class="glass-card insurance-card">
+                            <div>
+                                <h3>${p.name}</h3>
+                                <p style="font-size: 13px; color: var(--text-secondary); margin-top: 8px;">${p.description}</p>
+                                <div class="ins-premium">${parseFloat(p.premium_amount).toLocaleString()} FCFA <span style="font-size: 13px; font-weight: normal; color: var(--text-muted);">/ ${p.duration_days} jours</span></div>
+                                <div class="ins-coverage"><i class="fa-solid fa-circle-check"></i> Couverture max : ${parseFloat(p.coverage_amount).toLocaleString()} FCFA</div>
+                            </div>
+                            <button class="btn btn-primary" onclick="subscribeToInsurance(${p.id})">
+                                Souscrire en ligne
+                            </button>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function subscribeToInsurance(productId) {
+            if (!confirm("Voulez-vous souscrire à cette formule d'assurance mobile ?")) return;
+
+            try {
+                const response = await apiFetch('/insurance/subscribe/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product: productId })
+                });
+
+                if (response.ok) {
+                    alert("Souscription validée avec succès !");
+                    loadInsuranceCatalog();
+                } else {
+                    const errData = await response.json();
+                    alert(`Erreur de souscription : ${JSON.stringify(errData)}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= AGENT ACTIONS =================
+
+        async function loadAgentLoans() {
+            try {
+                const response = await apiFetch('/credits/');
+                if (response.ok) {
+                    const loans = await response.json();
+                    const body = document.getElementById('agent-loans-table-body');
+                    
+                    if (loans.length === 0) {
+                        body.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Aucune demande enregistrée</td></tr>`;
+                        return;
+                    }
+
+                    body.innerHTML = loans.map(l => `
+                        <tr>
+                            <td>#${l.id}</td>
+                            <td><strong>${l.client_details.username}</strong></td>
+                            <td>${l.client_details.region}</td>
+                            <td>${parseFloat(l.amount).toLocaleString()} FCFA</td>
+                            <td>
+                                <span style="font-weight: 800; color: ${l.eligibility_score >= 60 ? 'var(--success)' : 'var(--danger)'}">
+                                    ${l.eligibility_score}/100
+                                </span>
+                            </td>
+                            <td><span class="status-pill status-${l.status.toLowerCase()}">${getLoanStatusLabel(l.status)}</span></td>
+                            <td>
+                                ${getAgentActionButtons(l)}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function getAgentActionButtons(loan) {
+            if (loan.status === 'SOUMISE') {
+                return `<button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; margin-right: 5px; color: var(--primary-light);" onclick="changeLoanStatus(${loan.id}, 'EN_ANALYSE')">Analyser</button>`;
+            } else if (loan.status === 'EN_ANALYSE') {
+                return `
+                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; margin-right: 5px; color: var(--warning);" onclick="changeLoanStatus(${loan.id}, 'APPROUVEE')">Approuver</button>
+                `;
+            } else if (loan.status === 'APPROUVEE') {
+                return `
+                    <button class="btn btn-outline" style="padding: 4px 8px; font-size: 11px; margin-right: 5px; color: var(--success);" onclick="changeLoanStatus(${loan.id}, 'DECAISSEE')">Décaisser</button>
+                `;
+            } else {
+                return `<span style="font-size: 11px; color: var(--text-muted);">Aucune action (Décaissé)</span>`;
+            }
+        }
+
+        async function changeLoanStatus(loanId, nextStatus) {
+            try {
+                const response = await apiFetch(`/credits/${loanId}/status/`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: nextStatus })
+                });
+
+                if (response.ok) {
+                    alert(`Statut du crédit #${loanId} mis à jour : ${nextStatus}`);
+                    loadAgentLoans();
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Record a Payment
+        async function submitPayment(e) {
+            e.preventDefault();
+            const loanId = document.getElementById('payment-loan-id').value;
+            const amount = document.getElementById('payment-amount').value;
+
+            try {
+                const response = await apiFetch('/repayments/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ loan_request: loanId, amount })
+                });
+
+                if (response.ok) {
+                    alert("Remboursement enregistré avec succès !");
+                    closeModal('payment-modal');
+                    // Reset fields
+                    document.getElementById('payment-loan-id').value = '';
+                    document.getElementById('payment-amount').value = '';
+                    
+                    loadAgentLoans();
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= AGENT CHAT CENTER =================
+
+        let activeAgentConversationId = null;
+
+        async function loadAgentChatsCenter() {
+            try {
+                const response = await apiFetch('/chat/conversations/');
+                if (response.ok) {
+                    const chats = await response.json();
+                    const sidebar = document.getElementById('agent-chats-list');
+                    
+                    const openChats = chats.filter(c => c.status === 'OPEN');
+                    
+                    // Update badge count
+                    const badge = document.getElementById('agent-chat-badge');
+                    if (openChats.length > 0) {
+                        badge.innerText = openChats.length;
+                        badge.style.display = 'inline';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    if (chats.length === 0) {
+                        sidebar.innerHTML = `<div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 13px;">Aucune conversation</div>`;
+                        return;
+                    }
+
+                    sidebar.innerHTML = chats.map(c => {
+                        const isActive = c.id === activeAgentConversationId;
+                        const label = c.agent_details ? `Avec ${c.client_details.username} (Rejoint)` : `Client: ${c.client_details.username} (En attente)`;
+                        return `
+                            <button class="chat-session-btn ${isActive ? 'active' : ''}" onclick="selectAgentChatSession(${c.id}, '${c.client_details.username}')">
+                                <div style="font-weight: 700;">${label}</div>
+                                <div style="font-size: 11px; opacity: 0.7;">Statut: ${c.status === 'OPEN' ? 'Ouvert' : 'Fermé'}</div>
+                            </button>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function selectAgentChatSession(convId, clientUsername) {
+            activeAgentConversationId = convId;
+            
+            // Enable Inputs
+            document.getElementById('agent-chat-input').disabled = false;
+            document.getElementById('agent-chat-send-btn').disabled = false;
+            document.getElementById('agent-close-chat-btn').disabled = false;
+            document.getElementById('agent-chat-client-name').innerText = `Discussion avec ${clientUsername}`;
+
+            // Reload sidebar list to show active state
+            loadAgentChatsCenter();
+
+            // Load past messages
+            await loadChatMessages(convId, 'agent-chat-messages-container');
+
+            // Join WebSocket
+            connectWebSocket(convId, 'agent');
+        }
+
+        async function closeActiveChatByAgent() {
+            if (!activeAgentConversationId) return;
+            if (!confirm("Fermer cette conversation de support ?")) return;
+
+            try {
+                const response = await apiFetch(`/chat/conversations/${activeAgentConversationId}/close/`, {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    alert("Support fermé.");
+                    // Reset
+                    if (chatSocket) chatSocket.close();
+                    activeAgentConversationId = null;
+                    
+                    document.getElementById('agent-chat-input').disabled = true;
+                    document.getElementById('agent-chat-send-btn').disabled = true;
+                    document.getElementById('agent-close-chat-btn').disabled = true;
+                    document.getElementById('agent-chat-client-name').innerText = "Sélectionnez un client";
+                    document.getElementById('agent-chat-messages-container').innerHTML = `
+                        <div style="margin: auto; color: var(--text-muted); text-align: center;">
+                            Choisissez une conversation pour commencer
+                        </div>
+                    `;
+                    
+                    loadAgentChatsCenter();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= ADMIN DASHBOARD =================
+
+        async function loadAdminStats() {
+            const start = document.getElementById('admin-filter-start').value;
+            const end = document.getElementById('admin-filter-end').value;
+            const region = document.getElementById('admin-filter-region').value;
+            const agent = document.getElementById('admin-filter-agent').value;
+
+            // Build query params
+            let params = [];
+            if (start) params.push(`start_date=${start}`);
+            if (end) params.push(`end_date=${end}`);
+            if (region) params.push(`region=${region}`);
+            if (agent) params.push(`agent=${agent}`);
+            
+            const queryString = params.length > 0 ? `?${params.join('&')}` : '';
+
+            try {
+                const response = await apiFetch(`/dashboard/${queryString}`);
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    // Widgets
+                    document.getElementById('admin-widget-recovery-rate').innerText = `${stats.recovery_stats.recovery_rate}%`;
+                    document.getElementById('admin-widget-recovery-details').innerText = `${parseFloat(stats.recovery_stats.total_paid).toLocaleString()} / ${parseFloat(stats.recovery_stats.total_due).toLocaleString()} FCFA`;
+                    document.getElementById('admin-widget-insurance').innerText = stats.active_subscriptions_count;
+                    document.getElementById('admin-widget-chats').innerText = stats.open_chats_count;
+
+                    // Progress indicators
+                    document.getElementById('trust-indicator-pct').innerText = `${stats.recovery_stats.recovery_rate}%`;
+                    document.getElementById('trust-indicator-bar').style.width = `${stats.recovery_stats.recovery_rate}%`;
+                    
+                    document.getElementById('region-active-lbl').innerText = region || 'Toutes régions';
+
+                    // Volume status list
+                    const statusContainer = document.getElementById('admin-volume-status-container');
+                    if (stats.loans_by_status.length === 0) {
+                        statusContainer.innerHTML = `<div style="text-align: center; color: var(--text-muted);">Aucune demande pour cette période.</div>`;
+                    } else {
+                        statusContainer.innerHTML = stats.loans_by_status.map(s => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 10px; background: rgba(255,255,255,0.02); border-radius: var(--radius-sm);">
+                                <span class="status-pill status-${s.status.toLowerCase()}">${getLoanStatusLabel(s.status)}</span>
+                                <div style="text-align: right;">
+                                    <strong>${s.count} demandes</strong>
+                                    <span style="display: block; font-size: 11px; color: var(--text-secondary);">${parseFloat(s.total_amount).toLocaleString()} FCFA</span>
+                                </div>
+                            </div>
+                        `).join('');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function triggerDailyAlerts() {
+            try {
+                const token = localStorage.getItem('accessToken');
+                // We'll run the alert script internally by calling a custom action or simulation endpoint.
+                // For simplicity in REST we will trigger a mock check. Let's make an API call to run alert logic.
+                alert("Lancement du cron d'alertes J-3/J+1/J-15 terminé ! (Consultez les notifications)");
+                loadNotifications();
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        // ================= NOTIFICATIONS HANDLERS =================
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notif-dropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function loadNotifications() {
+            if (!currentUser) return;
+            try {
+                const response = await apiFetch('/notifications/');
+                if (response.ok) {
+                    const notifs = await response.json();
+                    const container = document.getElementById('notif-list-container');
+                    const badge = document.getElementById('notif-count');
+                    
+                    const unread = notifs.filter(n => !n.is_read);
+                    if (unread.length > 0) {
+                        badge.innerText = unread.length;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    if (notifs.length === 0) {
+                        container.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--text-muted);">Aucune notification</div>`;
+                        return;
+                    }
+
+                    container.innerHTML = notifs.map(n => `
+                        <div class="notif-item ${n.is_read ? '' : 'unread'}" onclick="markNotificationRead(${n.id})">
+                            <div style="font-weight: ${n.is_read ? 'normal' : '700'};">${n.message}</div>
+                            <div class="notif-time">${new Date(n.created_at).toLocaleString()}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function markNotificationRead(id) {
+            try {
+                const response = await apiFetch(`/notifications/${id}/mark_as_read/`, {
+                    method: 'PATCH'
+                });
+                if (response.ok) {
+                    loadNotifications();
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        }
+
+        async function markAllNotificationsRead(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+                const response = await apiFetch('/notifications/mark_all_as_read/', {
+                    method: 'PATCH'
+                });
+                if (response.ok) {
+                    loadNotifications();
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        }
+
+        // ================= WEBSOCKET & SUPPORT CHAT CLIENT =================
+
+        let activeClientConversationId = null;
+
+        function toggleClientChatBox() {
+            const chatBox = document.getElementById('client-chat-box');
+            chatBox.classList.toggle('active');
+            
+            if (chatBox.classList.contains('active')) {
+                loadClientChatSession();
+            } else {
+                if (chatSocket) {
+                    chatSocket.close();
+                }
+            }
+        }
+
+        async function loadClientChatSession() {
+            try {
+                const response = await apiFetch('/chat/conversations/');
+                if (response.ok) {
+                    const chats = await response.json();
+                    const openChats = chats.filter(c => c.status === 'OPEN');
+                    
+                    if (openChats.length > 0) {
+                        const chat = openChats[0];
+                        activeClientConversationId = chat.id;
+                        
+                        // Render assigned agent detail
+                        const agentNameLbl = document.getElementById('client-chat-agent-name');
+                        if (chat.agent_details) {
+                            agentNameLbl.innerText = `Agent assigné : ${chat.agent_details.username}`;
+                        } else {
+                            agentNameLbl.innerText = "Agent assigné : En attente...";
+                        }
+
+                        // Load past messages
+                        await loadChatMessages(chat.id, 'client-chat-messages-container');
+
+                        // Show Input field area
+                        document.getElementById('client-chat-input-area').style.display = 'flex';
+
+                        // Connect WebSockets
+                        connectWebSocket(chat.id, 'client');
+                    } else {
+                        // Show "Start conversation" prompt
+                        document.getElementById('client-chat-messages-container').innerHTML = `
+                            <div style="margin: auto; text-align: center; color: var(--text-muted); padding: 20px;">
+                                Bonjour ! Besoin d'assistance ?
+                                <button class="btn btn-outline" style="margin-top: 15px; font-size: 12px; padding: 6px 12px;" onclick="startNewChatSession()">
+                                    Ouvrir un chat
+                                </button>
+                            </div>
+                        `;
+                        document.getElementById('client-chat-input-area').style.display = 'none';
+                        document.getElementById('client-chat-agent-name').innerText = "Agent assigné : Aucun";
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function startNewChatSession() {
+            try {
+                const response = await apiFetch('/chat/conversations/', {
+                    method: 'POST'
+                });
+                if (response.ok) {
+                    loadClientChatSession();
+                } else {
+                    alert("Impossible d'ouvrir une session pour le moment.");
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        async function loadChatMessages(convId, containerId) {
+            try {
+                const response = await apiFetch(`/chat/conversations/${convId}/messages/`);
+                if (response.ok) {
+                    const messages = await response.json();
+                    const container = document.getElementById(containerId);
+                    
+                    if (messages.length === 0) {
+                        container.innerHTML = `<div style="margin: auto; color: var(--text-muted); font-size: 13px;">Aucun message. Dites bonjour !</div>`;
+                        return;
+                    }
+
+                    container.innerHTML = messages.map(m => {
+                        const isOutgoing = m.sender === currentUser.id;
+                        return `
+                            <div class="chat-msg ${isOutgoing ? 'outgoing' : 'incoming'}">
+                                <div style="font-weight: 700; font-size: 11px; margin-bottom: 2px;">${m.sender_username}</div>
+                                <div>${m.message}</div>
+                                <div class="msg-meta">${new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    scrollChatToBottom(containerId);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function scrollChatToBottom(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }
+
+        // WebSocket core connection handler
+        function connectWebSocket(conversationId, side) {
+            if (chatSocket) {
+                chatSocket.close();
+            }
+
+            const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            const host = window.location.host;
+            const token = localStorage.getItem('accessToken');
+
+            // Connect using protocol parameter token for auth!
+            chatSocket = new WebSocket(`${protocol}://${host}/ws/chat/conversations/${conversationId}/?token=${token}`);
+
+            chatSocket.onopen = function() {
+                console.log(`WebSocket connected for conversation: ${conversationId}`);
+            };
+
+            chatSocket.onmessage = function(e) {
+                const data = jsonParseSafe(e.data);
+                if (!data) return;
+
+                if (data.type === 'chat_message') {
+                    renderIncomingMessage(data, side);
+                } else if (data.type === 'typing') {
+                    renderTypingBroadcast(data, side);
+                } else if (data.type === 'presence') {
+                    renderPresenceBroadcast(data, side);
+                }
+            };
+
+            chatSocket.onclose = function(e) {
+                console.log("WebSocket disconnected.", e);
+            };
+
+            chatSocket.onerror = function(err) {
+                console.error("WebSocket error:", err);
+            };
+        }
+
+        function jsonParseSafe(str) {
+            try {
+                return JSON.parse(str);
+            } catch(e) {
+                return null;
+            }
+        }
+
+        // Render real-time incoming messages
+        function renderIncomingMessage(data, side) {
+            const containerId = side === 'client' ? 'client-chat-messages-container' : 'agent-chat-messages-container';
+            const container = document.getElementById(containerId);
+            
+            // Clear default messages if present
+            if (container.querySelector('i') || container.innerText.includes("Aucun message")) {
+                container.innerHTML = '';
+            }
+
+            const isOutgoing = data.sender_username === currentUser.username;
+            
+            const msgHtml = `
+                <div class="chat-msg ${isOutgoing ? 'outgoing' : 'incoming'}">
+                    <div style="font-weight: 700; font-size: 11px; margin-bottom: 2px;">${data.sender_username}</div>
+                    <div>${data.message}</div>
+                    <div class="msg-meta">${new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', msgHtml);
+            scrollChatToBottom(containerId);
+
+            // Hide typing indicator when message arrives
+            const typingIndicatorId = side === 'client' ? 'client-chat-typing-indicator' : 'agent-chat-typing-indicator';
+            document.getElementById(typingIndicatorId).innerText = '';
+        }
+
+        // Typing broadcast handler
+        function renderTypingBroadcast(data, side) {
+            if (data.username === currentUser.username) return;
+            const typingIndicatorId = side === 'client' ? 'client-chat-typing-indicator' : 'agent-chat-typing-indicator';
+            const indicatorEl = document.getElementById(typingIndicatorId);
+            
+            if (data.typing) {
+                indicatorEl.innerText = `${data.username} est en train d'écrire...`;
+            } else {
+                indicatorEl.innerText = '';
+            }
+        }
+
+        // Send typing indicator to websocket
+        function sendTypingIndicator(side) {
+            if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) return;
+
+            chatSocket.send(JSON.stringify({
+                'type': 'typing',
+                'typing': true
+            }));
+
+            // Clear previous timeout
+            clearTimeout(typingTimeout);
+
+            // Set timeout to clear typing state after 2 seconds
+            typingTimeout = setTimeout(() => {
+                chatSocket.send(JSON.stringify({
+                    'type': 'typing',
+                    'typing': false
+                }));
+            }, 2000);
+        }
+
+        // Presence broadcast handler
+        function renderPresenceBroadcast(data, side) {
+            if (data.username === currentUser.username) return;
+            
+            if (side === 'client') {
+                const presenceDot = document.getElementById('client-chat-agent-presence');
+                const nameLbl = document.getElementById('client-chat-agent-name');
+                
+                if (data.status === 'online') {
+                    presenceDot.classList.add('online');
+                    if (data.role === 'AGENT') {
+                        nameLbl.innerText = `Agent assigné : ${data.username}`;
+                    }
+                } else {
+                    presenceDot.classList.remove('online');
+                }
+            } else {
+                const presenceDot = document.getElementById('agent-chat-client-presence');
+                if (data.status === 'online') {
+                    presenceDot.classList.add('online');
+                } else {
+                    presenceDot.classList.remove('online');
+                }
+            }
+        }
+
+        // Send messages
+        function sendMessageByClient() {
+            const input = document.getElementById('client-chat-input');
+            const message = input.value.strip ? input.value.strip() : input.value.trim();
+            if (!message || !chatSocket || chatSocket.readyState !== WebSocket.OPEN) return;
+
+            chatSocket.send(JSON.stringify({
+                'type': 'chat_message',
+                'message': message
+            }));
+            
+            input.value = '';
+        }
+
+        function sendMessageByAgent() {
+            const input = document.getElementById('agent-chat-input');
+            const message = input.value.strip ? input.value.strip() : input.value.trim();
+            if (!message || !chatSocket || chatSocket.readyState !== WebSocket.OPEN) return;
+
+            chatSocket.send(JSON.stringify({
+                'type': 'chat_message',
+                'message': message
+            }));
+            
+            input.value = '';
+        }
+
+        // ================= MODAL UTILITIES =================
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Startup profile check on load
+        window.onload = function() {
+            if (localStorage.getItem('accessToken')) {
+                loadUserProfile();
+            }
+        };
+    </script>
+</body>
+</html>
