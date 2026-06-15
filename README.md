@@ -1,12 +1,12 @@
-# 🏦 COFINANCE CI — Plateforme de Microfinance & Assurance Mobile
+#   COFINANCE CI — Plateforme de Microfinance & Assurance Mobile
 
 > **Plateforme digitale complète de gestion de microcrédits, d'assurance mobile et de support client en temps réel.**
 > Développée avec Django / DRF · JWT Auth · WebSockets · Design Premium
-> 🌍 Contexte ivoirien : devises **FCFA**, fuseau horaire **Africa/Abidjan**
+>  Contexte ivoirien : devises **FCFA**, fuseau horaire **Africa/Abidjan**
 
 ---
 
-## 🛠️ Stack Technique
+##   Stack Technique
 
 | Couche | Technologies |
 |---|---|
@@ -20,7 +20,7 @@
 
 ---
 
-## 👥 Comptes de Démonstration
+##   Comptes de Démonstration
 
 ```bash
 python manage.py seed_db
@@ -35,7 +35,7 @@ python manage.py seed_db
 
 ---
 
-## ⚙️ Installation & Lancement
+##   Installation & Lancement
 
 ```bash
 # 1. Créer et activer l'environnement virtuel
@@ -60,15 +60,15 @@ python manage.py run_alerts
 python manage.py runserver
 ```
 
-🌐 Application disponible sur : **`http://127.0.0.1:8000/`**
-📚 Documentation API : **`http://127.0.0.1:8000/api/docs/`**
-🛡️ Admin Django : **`http://127.0.0.1:8000/admin/`**
+  Application disponible sur : **`http://127.0.0.1:8000/`**
+  Documentation API : **`http://127.0.0.1:8000/api/docs/`**
+  Admin Django : **`http://127.0.0.1:8000/admin/`**
 
 ---
 
-## 🔌 Référence Complète des Endpoints API
+##   Référence Complète des Endpoints API
 
-### 🔐 Authentification & Profil
+###   Authentification & Profil
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -80,7 +80,7 @@ python manage.py runserver
 | `POST` | `/api/profile/avatar/` | Connecté | Upload photo de profil (JPEG/PNG, max 5 Mo) |
 | `DELETE` | `/api/profile/avatar/` | Connecté | Supprimer la photo de profil |
 
-### 💳 Gestion des Microcrédits
+###  Gestion des Microcrédits
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -91,16 +91,16 @@ python manage.py runserver
 | `PUT/PATCH` | `/api/credits/{id}/` | CLIENT | Modifier une demande (**SOUMISE uniquement**, bloqué sinon) |
 | `DELETE` | `/api/credits/{id}/` | CLIENT | Supprimer une demande (**SOUMISE uniquement**, bloqué sinon) |
 
-> 💡 Le champ `eligibility_score_detail` explique en clair comment le score a été calculé.
+>   Le champ `eligibility_score_detail` explique en clair comment le score a été calculé.
 
-### 💰 Suivi des Remboursements
+###   Suivi des Remboursements
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
 | `POST` | `/api/repayments/` | AGENT/ADMIN | Enregistrer un paiement (+ AuditLog automatique) |
 | `GET` | `/api/repayments/` | Connecté | Historique paginé des remboursements |
 
-### 🛡️ Assurances Mobiles
+###   Assurances Mobiles
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -108,7 +108,7 @@ python manage.py runserver
 | `POST` | `/api/insurance/subscribe/` | CLIENT | Souscrire (**doublon actif refusé**) |
 | `GET` | `/api/insurance/my-policies/` | CLIENT | Mes polices d'assurance |
 
-### 💬 Chat de Support en Temps Réel
+###   Chat de Support en Temps Réel
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -119,7 +119,7 @@ python manage.py runserver
 | `POST` | `/api/chat/conversations/{id}/close/` | Connecté | Fermer une conversation |
 | `WS` | `/ws/chat/conversations/{id}/` | Connecté | Canal WebSocket temps réel |
 
-### 🔔 Notifications Internes
+###  Notifications Internes
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -127,7 +127,7 @@ python manage.py runserver
 | `PATCH` | `/api/notifications/{id}/mark_as_read/` | Connecté | Marquer comme lue |
 | `PATCH` | `/api/notifications/mark_all_as_read/` | Connecté | Tout marquer comme lu |
 
-### 📊 Tableau de Bord Administrateur
+###   Tableau de Bord Administrateur
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -135,7 +135,7 @@ python manage.py runserver
 
 > Filtres disponibles : `?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD&region=Abidjan&agent=<id>`
 
-### 👑 Gestion des Utilisateurs (Admin)
+###   Gestion des Utilisateurs (Admin)
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -144,7 +144,7 @@ python manage.py runserver
 | `GET/PATCH` | `/api/admin/users/{id}/` | ADMIN | Détail / modifier un utilisateur |
 | `PATCH` | `/api/admin/users/{id}/toggle_active/` | ADMIN | Activer ou désactiver un compte |
 
-### 📋 Journal d'Audit (Agent / Admin)
+###   Journal d'Audit (Agent / Admin)
 
 | Méthode | URL | Accès | Description |
 |:---|:---|:---|:---|
@@ -154,7 +154,7 @@ python manage.py runserver
 
 ---
 
-## 🔒 Sécurité & Règles Métier
+##   Sécurité & Règles Métier
 
 ### Validation stricte des entrées
 | Champ | Règle |
@@ -167,15 +167,15 @@ python manage.py runserver
 | `avatar` | JPEG/PNG uniquement — taille max 5 Mo |
 
 ### Règles métier critiques
-- ⚡ **1 crédit actif max** par client à la fois
-- 🔄 **Workflow unidirectionnel** des statuts — rétrogradation impossible
-- 🚫 **Doublons assurance** bloqués (même produit actif)
-- 🔐 **Auto-désactivation admin** impossible
-- ⏱️ **Throttling** : 100 req/jour (anonyme), 2000/jour (connecté), 5 tentatives/min (login)
+-    **1 crédit actif max** par client à la fois
+-    **Workflow unidirectionnel** des statuts — rétrogradation impossible
+-    **Doublons assurance** bloqués (même produit actif)
+-    **Auto-désactivation admin** impossible
+-    **Throttling** : 100 req/jour (anonyme), 2000/jour (connecté), 5 tentatives/min (login)
 
 ---
 
-## 🧪 Suite de Tests
+##   Suite de Tests
 
 ```bash
 python manage.py test core --verbosity=2
@@ -198,24 +198,24 @@ python manage.py test core --verbosity=2
 
 ---
 
-## 🕑 Alertes Automatiques (Cron)
+##  Alertes Automatiques (Cron)
 
 La commande `python manage.py run_alerts` envoie des notifications pour :
-- 📅 **J-3** : Prochaine échéance dans 3 jours
-- ⚠️ **J+1** : Échéance en retard
-- 🛡️ **J-15** : Expiration d'assurance dans 15 jours
+-  **J-3** : Prochaine échéance dans 3 jours
+-  **J+1** : Échéance en retard
+-  **J-15** : Expiration d'assurance dans 15 jours
 
 ---
 
-## 💬 Test du Chat Temps Réel (WebSockets)
+##  Test du Chat Temps Réel (WebSockets)
 
 1. **Onglet 1** → `http://127.0.0.1:8000/` → Connexion `client1` → Ouvrir un chat
 2. **Onglet 2** → `http://127.0.0.1:8000/` → Connexion `agent1` → Centre de Support → Rejoindre
-3. ✨ Messages instantanés, indicateur *"en train d'écrire..."*, indicateur de présence en ligne
+3.  Messages instantanés, indicateur *"en train d'écrire..."*, indicateur de présence en ligne
 
 ---
 
-## 📁 Structure du Projet
+##  Structure du Projet
 
 ```
 MicroFinance CI Platform/
