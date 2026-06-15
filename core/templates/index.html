@@ -40,7 +40,7 @@
 
                 <!-- User Profile Info -->
                 <div class="user-menu">
-                    <div class="user-avatar" id="user-avatar-initials">U</div>
+                    <div class="user-avatar" id="user-avatar-initials" style="cursor: pointer; overflow: hidden;" onclick="openProfileModal()" title="Mon Profil">U</div>
                     <div style="text-align: left;">
                         <div style="font-weight: 700;" id="user-display-name">Username</div>
                         <span class="role-badge" id="user-display-role">Client</span>
@@ -97,8 +97,7 @@
                         <label for="reg-role">Rôle souhaité</label>
                         <select id="reg-role" class="form-control" required>
                             <option value="CLIENT">Client</option>
-                            <option value="AGENT">Agent de Crédit</option>
-                            <option value="ADMIN">Administrateur</option>
+                            <option value="AGENT">Agent de terrain</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -113,6 +112,10 @@
                 <div class="form-group">
                     <label for="reg-password">Mot de passe</label>
                     <input type="password" id="reg-password" class="form-control" placeholder="Créez un mot de passe fort" required>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password-confirm">Confirmer le mot de passe</label>
+                    <input type="password" id="reg-password-confirm" class="form-control" placeholder="Confirmez votre mot de passe" required>
                 </div>
                 
                 <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
@@ -157,6 +160,12 @@
                 <div id="sidebar-admin-group" style="display: none;">
                     <button class="sidebar-btn active" onclick="switchSection('admin-dashboard')">
                         <i class="fa-solid fa-chart-line"></i> Dashboard Admin
+                    </button>
+                    <button class="sidebar-btn" onclick="switchSection('admin-users')">
+                        <i class="fa-solid fa-users-gear"></i> Gestion Utilisateurs
+                    </button>
+                    <button class="sidebar-btn" onclick="switchSection('admin-chats')">
+                        <i class="fa-solid fa-headset"></i> Assignation Support
                     </button>
                 </div>
             </aside>
@@ -440,6 +449,74 @@
                     </div>
                 </div>
 
+                <!-- 7. ADMIN USERS MANAGEMENT -->
+                <div id="admin-users" class="dashboard-view">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Gestion des utilisateurs</h2>
+                        <button class="btn btn-primary" onclick="openModal('create-user-modal')">
+                            <i class="fa-solid fa-user-plus"></i> Créer un compte
+                        </button>
+                    </div>
+                    <div class="glass-card" style="padding: 20px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) 120px; gap: 15px; align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Rôle</label>
+                                <select id="admin-users-filter-role" class="form-control">
+                                    <option value="">Tous</option>
+                                    <option value="CLIENT">Client</option>
+                                    <option value="AGENT">Agent</option>
+                                    <option value="ADMIN">Administrateur</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label>Région</label>
+                                <input type="text" id="admin-users-filter-region" class="form-control" placeholder="Ex: Abidjan">
+                            </div>
+                            <button class="btn btn-primary" onclick="loadAdminUsers()" style="width: 100%;">Filtrer</button>
+                        </div>
+                    </div>
+                    <div class="glass-card" style="padding: 24px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Utilisateur</th>
+                                        <th>Rôle</th>
+                                        <th>Région</th>
+                                        <th>Téléphone</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 8. ADMIN CHAT ASSIGNMENT -->
+                <div id="admin-chats" class="dashboard-view">
+                    <h2 style="margin-bottom: 20px;">Assignation des conversations de support</h2>
+                    <div class="glass-card" style="padding: 24px;">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Client</th>
+                                        <th>Agent assigné</th>
+                                        <th>Statut</th>
+                                        <th>Date</th>
+                                        <th>Assigner à</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-chats-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
     </main>
@@ -536,6 +613,175 @@
         </div>
     </div>
 
+    <!-- 3. Profile Modal -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content glass-card" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3>Mon Profil</h3>
+                <button class="modal-close" onclick="closeModal('profile-modal')">&times;</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 180px 1fr; gap: 24px; margin-bottom: 20px;">
+                <!-- Left: Avatar Upload / Management -->
+                <div style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 15px; border-right: 1px solid var(--border-color); padding-right: 20px;">
+                    <div class="user-avatar" id="profile-avatar-preview" style="width: 120px; height: 120px; font-size: 36px; border-radius: 50%; overflow: hidden; background: var(--primary-grad); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-md);">
+                        U
+                    </div>
+                    <div style="width: 100%;">
+                        <button class="btn btn-outline" style="padding: 8px 12px; font-size: 13px; width: 100%; margin-bottom: 8px;" onclick="document.getElementById('avatar-file-input').click()">
+                            <i class="fa-solid fa-camera"></i> Changer la photo
+                        </button>
+                        <button class="btn btn-outline" id="profile-avatar-delete-btn" style="padding: 8px 12px; font-size: 13px; width: 100%; color: var(--danger); border-color: rgba(239, 68, 68, 0.2);" onclick="handleAvatarDelete()">
+                            <i class="fa-solid fa-trash"></i> Supprimer
+                        </button>
+                        <input type="file" id="avatar-file-input" style="display: none;" accept="image/png, image/jpeg, image/jpg" onchange="handleAvatarUpload(event)">
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted);">JPEG/PNG, Max 5 Mo</span>
+                </div>
+
+                <!-- Right: Profile Info Form -->
+                <div>
+                    <form id="profile-form" onsubmit="updateProfileInfo(event)">
+                        <div class="grid-split-2">
+                            <div class="form-group">
+                                <label>Nom d'utilisateur</label>
+                                <input type="text" id="profile-username" class="form-control" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label>Rôle</label>
+                                <input type="text" id="profile-role" class="form-control" disabled>
+                            </div>
+                        </div>
+                        <div class="grid-split-2">
+                            <div class="form-group">
+                                <label for="profile-first-name">Prénom</label>
+                                <input type="text" id="profile-first-name" class="form-control" placeholder="Ex: Jean">
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-last-name">Nom</label>
+                                <input type="text" id="profile-last-name" class="form-control" placeholder="Ex: Kouassi">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-email">Adresse e-mail</label>
+                            <input type="email" id="profile-email" class="form-control" required>
+                        </div>
+                        <div class="grid-split-2">
+                            <div class="form-group">
+                                <label for="profile-phone">Numéro de téléphone</label>
+                                <input type="text" id="profile-phone" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-region">Région</label>
+                                <input type="text" id="profile-region" class="form-control" required>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                            <button type="button" class="btn btn-outline" style="color: var(--warning); border-color: rgba(245, 158, 11, 0.2);" onclick="openChangePasswordModal()">
+                                <i class="fa-solid fa-key"></i> Mot de passe
+                            </button>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('profile-modal')">Annuler</button>
+                                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <!-- 5. Client Profile Modal (Agent / Admin) -->
+    <div class="modal" id="client-profile-modal">
+        <div class="modal-content glass-card" style="max-width: 900px; max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 id="client-profile-title">Profil client</h3>
+                <button class="modal-close" onclick="closeModal('client-profile-modal')">&times;</button>
+            </div>
+            <div id="client-profile-content">
+                <div style="padding: 30px; text-align: center; color: var(--text-muted);">Chargement...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Create User Modal (Admin) -->
+    <div class="modal" id="create-user-modal">
+        <div class="modal-content glass-card" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>Créer un compte utilisateur</h3>
+                <button class="modal-close" onclick="closeModal('create-user-modal')">&times;</button>
+            </div>
+            <form id="create-user-form" onsubmit="submitCreateUser(event)">
+                <div class="form-group">
+                    <label for="new-user-username">Nom d'utilisateur</label>
+                    <input type="text" id="new-user-username" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new-user-email">E-mail</label>
+                    <input type="email" id="new-user-email" class="form-control" required>
+                </div>
+                <div class="grid-split-2">
+                    <div class="form-group">
+                        <label for="new-user-role">Rôle</label>
+                        <select id="new-user-role" class="form-control" required>
+                            <option value="AGENT">Agent de terrain</option>
+                            <option value="ADMIN">Administrateur</option>
+                            <option value="CLIENT">Client</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-user-region">Région</label>
+                        <input type="text" id="new-user-region" class="form-control" value="Abidjan" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="new-user-phone">Téléphone</label>
+                    <input type="text" id="new-user-phone" class="form-control" placeholder="+225 0707070707">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-password">Mot de passe</label>
+                    <input type="password" id="new-user-password" class="form-control" placeholder="Min 8 caractères" required>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-user-modal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Créer le compte</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 7. Change Password Modal -->
+    <div class="modal" id="change-password-modal">
+        <div class="modal-content glass-card" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Changer le mot de passe</h3>
+                <button class="modal-close" onclick="closeModal('change-password-modal')">&times;</button>
+            </div>
+            <form id="change-password-form" onsubmit="handleChangePassword(event)">
+                <div class="form-group">
+                    <label for="pwd-old">Ancien mot de passe</label>
+                    <input type="password" id="pwd-old" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="pwd-new">Nouveau mot de passe</label>
+                    <input type="password" id="pwd-new" class="form-control" placeholder="Min 8 caractères, 1 lettre, 1 chiffre" required>
+                </div>
+                <div class="form-group">
+                    <label for="pwd-confirm">Confirmer le nouveau mot de passe</label>
+                    <input type="password" id="pwd-confirm" class="form-control" required>
+                </div>
+                
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('change-password-modal')">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ================= JAVASCRIPT LOGIC ================= -->
     <script>
         // Global variables & state
@@ -544,6 +790,11 @@
         let activeChatSession = null;
         let chatSocket = null;
         let typingTimeout = null;
+
+        /** Extrait les résultats d'une réponse API paginée ou renvoie le tableau directement. */
+        function parseApiList(data) {
+            return Array.isArray(data) ? data : (data.results || []);
+        }
 
         // Custom API Fetch Wrapper (with automatic JWT header and token refreshing!)
         async function apiFetch(endpoint, options = {}) {
@@ -660,12 +911,18 @@
             const region = document.getElementById('reg-region').value;
             const phone = document.getElementById('reg-phone').value;
             const password = document.getElementById('reg-password').value;
+            const password_confirm = document.getElementById('reg-password-confirm').value;
+
+            if (password !== password_confirm) {
+                alert("Erreur d'inscription : Les deux mots de passe ne correspondent pas.");
+                return;
+            }
 
             try {
                 const response = await fetch(`${API_URL}/auth/register/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, role, region, phone, password })
+                    body: JSON.stringify({ username, email, role, region, phone, password, password_confirm })
                 });
 
                 if (response.ok) {
@@ -710,7 +967,13 @@
             // Set user profile visuals
             document.getElementById('user-display-name').innerText = currentUser.username;
             document.getElementById('user-display-role').innerText = getRoleLabel(currentUser.role);
-            document.getElementById('user-avatar-initials').innerText = currentUser.username.slice(0, 2).toUpperCase();
+            
+            const avatarContainer = document.getElementById('user-avatar-initials');
+            if (currentUser.avatar_url) {
+                avatarContainer.innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            } else {
+                avatarContainer.innerText = currentUser.username.slice(0, 2).toUpperCase();
+            }
 
             // Set Role Badge Color Class
             const roleBadge = document.getElementById('user-display-role');
@@ -802,6 +1065,10 @@
                 loadAgentChatsCenter();
             } else if (sectionId === 'admin-dashboard') {
                 loadAdminStats();
+            } else if (sectionId === 'admin-users') {
+                loadAdminUsers();
+            } else if (sectionId === 'admin-chats') {
+                loadAdminChatsAssignment();
             }
         }
 
@@ -811,7 +1078,7 @@
             try {
                 const response = await apiFetch('/credits/');
                 if (response.ok) {
-                    const loans = await response.json();
+                    const loans = parseApiList(await response.json());
                     
                     // Filter active loans (approuvée or décaissée)
                     const activeLoans = loans.filter(l => ['APPROUVEE', 'DECAISSEE'].includes(l.status));
@@ -822,7 +1089,8 @@
                     activeLoans.forEach(l => {
                         l.installments.forEach(i => {
                             if (!i.is_paid) {
-                                totalRemaining += parseFloat(i.amount_due) - parseFloat(i.amount_paid);
+                                const totalDue = parseFloat(i.total_due ?? i.amount_due) + parseFloat(i.penalty_amount || 0);
+                                totalRemaining += totalDue - parseFloat(i.amount_paid);
                             }
                         });
                     });
@@ -860,7 +1128,7 @@
                                             ${l.installments.map(inst => `
                                                 <tr>
                                                     <td>${inst.due_date}</td>
-                                                    <td>${parseFloat(inst.amount_due).toLocaleString()} FCFA</td>
+                                                    <td>${parseFloat(inst.total_due ?? inst.amount_due).toLocaleString()} FCFA${parseFloat(inst.penalty_amount || 0) > 0 ? ` <small style="color:var(--danger);">(+${parseFloat(inst.penalty_amount).toLocaleString()} pénalités)</small>` : ''}</td>
                                                     <td>${parseFloat(inst.amount_paid).toLocaleString()} FCFA</td>
                                                     <td>
                                                         <span class="status-pill ${inst.is_paid ? 'status-decaissee' : 'status-approuvee'}">
@@ -908,7 +1176,7 @@
             try {
                 const response = await apiFetch('/credits/');
                 if (response.ok) {
-                    const loans = await response.json();
+                    const loans = parseApiList(await response.json());
                     const body = document.getElementById('client-loans-table-body');
                     
                     if (loans.length === 0) {
@@ -1075,7 +1343,7 @@
             try {
                 const response = await apiFetch('/credits/');
                 if (response.ok) {
-                    const loans = await response.json();
+                    const loans = parseApiList(await response.json());
                     const body = document.getElementById('agent-loans-table-body');
                     
                     if (loans.length === 0) {
@@ -1086,7 +1354,11 @@
                     body.innerHTML = loans.map(l => `
                         <tr>
                             <td>#${l.id}</td>
-                            <td><strong>${l.client_details.username}</strong></td>
+                            <td>
+                                <button class="btn btn-outline" style="padding: 2px 8px; font-size: 12px;" onclick="openClientProfile(${l.client_details.id})">
+                                    <strong>${l.client_details.username}</strong>
+                                </button>
+                            </td>
                             <td>${l.client_details.region}</td>
                             <td>${parseFloat(l.amount).toLocaleString()} FCFA</td>
                             <td>
@@ -1180,7 +1452,7 @@
             try {
                 const response = await apiFetch('/chat/conversations/');
                 if (response.ok) {
-                    const chats = await response.json();
+                    const chats = parseApiList(await response.json());
                     const sidebar = document.getElementById('agent-chats-list');
                     
                     const openChats = chats.filter(c => c.status === 'OPEN');
@@ -1265,6 +1537,257 @@
             }
         }
 
+        async function triggerDailyAlerts() {
+            try {
+                const response = await apiFetch('/admin/run-alerts/', { method: 'POST' });
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    loadNotifications();
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${JSON.stringify(err)}`);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Erreur lors de l'exécution des alertes.");
+            }
+        }
+
+        // ================= ADMIN USERS =================
+
+        async function loadAdminUsers() {
+            const role = document.getElementById('admin-users-filter-role').value;
+            const region = document.getElementById('admin-users-filter-region').value;
+            let params = [];
+            if (role) params.push(`role=${role}`);
+            if (region) params.push(`region=${region}`);
+            const query = params.length ? `?${params.join('&')}` : '';
+
+            try {
+                const response = await apiFetch(`/admin/users/${query}`);
+                if (response.ok) {
+                    const users = parseApiList(await response.json());
+                    const body = document.getElementById('admin-users-table-body');
+                    if (users.length === 0) {
+                        body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Aucun utilisateur trouvé</td></tr>`;
+                        return;
+                    }
+                    body.innerHTML = users.map(u => `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td><strong>${u.username}</strong><br><small>${u.email}</small></td>
+                            <td><span class="role-badge role-${u.role.toLowerCase()}">${getRoleLabel(u.role)}</span></td>
+                            <td>${u.region}</td>
+                            <td>${u.phone || '—'}</td>
+                            <td>${u.is_active ? '<span style="color:var(--success);">Actif</span>' : '<span style="color:var(--danger);">Inactif</span>'}</td>
+                            <td>
+                                <button class="btn btn-outline" style="padding:4px 8px;font-size:11px;" onclick="toggleUserActive(${u.id})">
+                                    ${u.is_active ? 'Désactiver' : 'Activer'}
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function toggleUserActive(userId) {
+            if (!confirm("Confirmer le changement de statut de ce compte ?")) return;
+            try {
+                const response = await apiFetch(`/admin/users/${userId}/toggle_active/`, { method: 'PATCH' });
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(data.message);
+                    loadAdminUsers();
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${err.error || JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function submitCreateUser(e) {
+            e.preventDefault();
+            const payload = {
+                username: document.getElementById('new-user-username').value,
+                email: document.getElementById('new-user-email').value,
+                role: document.getElementById('new-user-role').value,
+                region: document.getElementById('new-user-region').value,
+                phone: document.getElementById('new-user-phone').value,
+                password: document.getElementById('new-user-password').value,
+            };
+            try {
+                const response = await apiFetch('/admin/users/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                if (response.ok) {
+                    alert("Compte créé avec succès.");
+                    closeModal('create-user-modal');
+                    document.getElementById('create-user-form').reset();
+                    loadAdminUsers();
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= ADMIN CHAT ASSIGNMENT =================
+
+        async function loadAdminChatsAssignment() {
+            try {
+                const [chatsRes, usersRes] = await Promise.all([
+                    apiFetch('/chat/conversations/'),
+                    apiFetch('/admin/users/?role=AGENT&is_active=true'),
+                ]);
+                if (!chatsRes.ok) return;
+
+                const chats = parseApiList(await chatsRes.json());
+                const agents = usersRes.ok ? parseApiList(await usersRes.json()) : [];
+                const body = document.getElementById('admin-chats-table-body');
+
+                if (chats.length === 0) {
+                    body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--text-muted);">Aucune conversation</td></tr>`;
+                    return;
+                }
+
+                const agentOptions = agents.map(a =>
+                    `<option value="${a.id}">${a.username} (${a.region})</option>`
+                ).join('');
+
+                body.innerHTML = chats.map(c => `
+                    <tr>
+                        <td>#${c.id}</td>
+                        <td>${c.client_details.username}</td>
+                        <td>${c.agent_details ? c.agent_details.username : '<span style="color:var(--warning);">Non assigné</span>'}</td>
+                        <td><span class="status-pill ${c.status === 'OPEN' ? 'status-soumise' : 'status-decaissee'}">${c.status === 'OPEN' ? 'Ouverte' : 'Fermée'}</span></td>
+                        <td>${new Date(c.created_at).toLocaleDateString()}</td>
+                        <td>
+                            ${c.status === 'OPEN' ? `
+                                <select id="assign-agent-${c.id}" class="form-control" style="display:inline-block;width:auto;font-size:12px;">
+                                    <option value="">— Choisir —</option>
+                                    ${agentOptions}
+                                </select>
+                                <button class="btn btn-primary" style="padding:4px 8px;font-size:11px;margin-left:5px;" onclick="assignChatToAgent(${c.id})">Assigner</button>
+                            ` : '—'}
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function assignChatToAgent(conversationId) {
+            const select = document.getElementById(`assign-agent-${conversationId}`);
+            const agentId = select ? select.value : '';
+            if (!agentId) {
+                alert("Veuillez sélectionner un agent.");
+                return;
+            }
+            try {
+                const response = await apiFetch(`/chat/conversations/${conversationId}/assign/`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent_id: parseInt(agentId) }),
+                });
+                if (response.ok) {
+                    alert("Agent assigné avec succès.");
+                    loadAdminChatsAssignment();
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${err.error || JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // ================= AGENT CLIENT PROFILE =================
+
+        async function openClientProfile(clientId) {
+            openModal('client-profile-modal');
+            const container = document.getElementById('client-profile-content');
+            container.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text-muted);">Chargement du profil...</div>`;
+
+            try {
+                const response = await apiFetch(`/agent/clients/${clientId}/`);
+                if (!response.ok) {
+                    container.innerHTML = `<div style="padding:30px;text-align:center;color:var(--danger);">Impossible de charger le profil.</div>`;
+                    return;
+                }
+                const data = await response.json();
+                const c = data.client;
+                const s = data.summary;
+
+                document.getElementById('client-profile-title').innerText = `Profil — ${c.username}`;
+
+                container.innerHTML = `
+                    <div class="widgets-grid" style="margin-bottom:20px;">
+                        <div class="glass-card widget-card">
+                            <div class="widget-header"><span>SCORE MOYEN</span></div>
+                            <div class="widget-val">${s.average_eligibility_score}/100</div>
+                        </div>
+                        <div class="glass-card widget-card">
+                            <div class="widget-header"><span>SOLDE RESTANT</span></div>
+                            <div class="widget-val">${parseFloat(s.remaining_balance).toLocaleString()} FCFA</div>
+                        </div>
+                        <div class="glass-card widget-card">
+                            <div class="widget-header"><span>ÉCHÉANCES EN RETARD</span></div>
+                            <div class="widget-val" style="color:${s.overdue_installments > 0 ? 'var(--danger)' : 'var(--success)'};">${s.overdue_installments}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <strong>${c.first_name || ''} ${c.last_name || ''}</strong> — ${c.region} — ${c.phone || 'N/A'}
+                    </div>
+                    <h4>Crédits (${s.total_loans})</h4>
+                    <div class="table-container" style="margin-bottom:20px;">
+                        <table>
+                            <thead><tr><th>ID</th><th>Montant</th><th>Score</th><th>Statut</th></tr></thead>
+                            <tbody>
+                                ${data.loans.map(l => `
+                                    <tr>
+                                        <td>#${l.id}</td>
+                                        <td>${parseFloat(l.amount).toLocaleString()} FCFA</td>
+                                        <td>${l.eligibility_score}/100</td>
+                                        <td><span class="status-pill status-${l.status.toLowerCase()}">${getLoanStatusLabel(l.status)}</span></td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="4">Aucun crédit</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4>Historique des remboursements</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Date</th><th>Crédit</th><th>Montant</th><th>Enregistré par</th></tr></thead>
+                            <tbody>
+                                ${data.payments.map(p => `
+                                    <tr>
+                                        <td>${new Date(p.paid_at).toLocaleDateString()}</td>
+                                        <td>#${p.loan_request}</td>
+                                        <td>${parseFloat(p.amount).toLocaleString()} FCFA</td>
+                                        <td>${p.recorded_by_details ? p.recorded_by_details.username : '—'}</td>
+                                    </tr>
+                                `).join('') || '<tr><td colspan="4">Aucun paiement</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div style="padding:30px;text-align:center;color:var(--danger);">Erreur serveur.</div>`;
+            }
+        }
+
         // ================= ADMIN DASHBOARD =================
 
         async function loadAdminStats() {
@@ -1320,18 +1843,6 @@
             }
         }
 
-        async function triggerDailyAlerts() {
-            try {
-                const token = localStorage.getItem('accessToken');
-                // We'll run the alert script internally by calling a custom action or simulation endpoint.
-                // For simplicity in REST we will trigger a mock check. Let's make an API call to run alert logic.
-                alert("Lancement du cron d'alertes J-3/J+1/J-15 terminé ! (Consultez les notifications)");
-                loadNotifications();
-            } catch(e) {
-                console.error(e);
-            }
-        }
-
         // ================= NOTIFICATIONS HANDLERS =================
 
         function toggleNotifications() {
@@ -1344,7 +1855,7 @@
             try {
                 const response = await apiFetch('/notifications/');
                 if (response.ok) {
-                    const notifs = await response.json();
+                    const notifs = parseApiList(await response.json());
                     const container = document.getElementById('notif-list-container');
                     const badge = document.getElementById('notif-count');
                     
@@ -1422,7 +1933,7 @@
             try {
                 const response = await apiFetch('/chat/conversations/');
                 if (response.ok) {
-                    const chats = await response.json();
+                    const chats = parseApiList(await response.json());
                     const openChats = chats.filter(c => c.status === 'OPEN');
                     
                     if (openChats.length > 0) {
@@ -1676,6 +2187,183 @@
             }));
             
             input.value = '';
+        }
+
+        // ================= USER PROFILE ACTIONS =================
+        function openProfileModal() {
+            if (!currentUser) return;
+            
+            document.getElementById('profile-username').value = currentUser.username;
+            document.getElementById('profile-role').value = getRoleLabel(currentUser.role);
+            document.getElementById('profile-first-name').value = currentUser.first_name || '';
+            document.getElementById('profile-last-name').value = currentUser.last_name || '';
+            document.getElementById('profile-email').value = currentUser.email;
+            document.getElementById('profile-phone').value = currentUser.phone;
+            document.getElementById('profile-region').value = currentUser.region;
+
+            // Render avatar preview
+            const preview = document.getElementById('profile-avatar-preview');
+            const deleteBtn = document.getElementById('profile-avatar-delete-btn');
+            
+            if (currentUser.avatar_url) {
+                preview.innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                deleteBtn.style.display = 'block';
+            } else {
+                preview.innerText = currentUser.username.slice(0, 2).toUpperCase();
+                deleteBtn.style.display = 'none';
+            }
+
+            openModal('profile-modal');
+        }
+
+        async function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate type & size
+            if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                alert("Erreur : Seuls les formats JPEG et PNG sont acceptés.");
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                alert("Erreur : Le fichier dépasse la taille maximale autorisée (5 Mo).");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+                const token = localStorage.getItem('accessToken');
+                const response = await fetch(`${API_URL}/profile/avatar/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    alert("Photo de profil mise à jour avec succès.");
+                    // Reload profile details to sync
+                    await loadUserProfile();
+                    // Sync the preview in modal too
+                    const preview = document.getElementById('profile-avatar-preview');
+                    const deleteBtn = document.getElementById('profile-avatar-delete-btn');
+                    preview.innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                    deleteBtn.style.display = 'block';
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur d'upload : ${JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur de connexion serveur lors de l'upload.");
+            } finally {
+                // Clear file input value to allow reselection
+                event.target.value = '';
+            }
+        }
+
+        async function handleAvatarDelete() {
+            if (!confirm("Voulez-vous supprimer votre photo de profil ?")) return;
+
+            try {
+                const response = await apiFetch('/profile/avatar/', {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert("Photo de profil supprimée avec succès.");
+                    await loadUserProfile();
+                    // Update preview in modal
+                    const preview = document.getElementById('profile-avatar-preview');
+                    const deleteBtn = document.getElementById('profile-avatar-delete-btn');
+                    preview.innerText = currentUser.username.slice(0, 2).toUpperCase();
+                    deleteBtn.style.display = 'none';
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${err.error || JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur de connexion serveur.");
+            }
+        }
+
+        async function updateProfileInfo(event) {
+            event.preventDefault();
+            const first_name = document.getElementById('profile-first-name').value;
+            const last_name = document.getElementById('profile-last-name').value;
+            const email = document.getElementById('profile-email').value;
+            const phone = document.getElementById('profile-phone').value;
+            const region = document.getElementById('profile-region').value;
+
+            try {
+                const response = await apiFetch('/profile/', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ first_name, last_name, email, phone, region })
+                });
+
+                if (response.ok) {
+                    alert("Profil mis à jour avec succès !");
+                    await loadUserProfile();
+                    closeModal('profile-modal');
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur de mise à jour : ${JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur serveur lors de la mise à jour.");
+            }
+        }
+
+        function openChangePasswordModal() {
+            // Close profile modal first
+            closeModal('profile-modal');
+            
+            // Clear change password form
+            document.getElementById('pwd-old').value = '';
+            document.getElementById('pwd-new').value = '';
+            document.getElementById('pwd-confirm').value = '';
+            
+            openModal('change-password-modal');
+        }
+
+        async function handleChangePassword(event) {
+            event.preventDefault();
+            const old_password = document.getElementById('pwd-old').value;
+            const new_password = document.getElementById('pwd-new').value;
+            const new_password_confirm = document.getElementById('pwd-confirm').value;
+
+            if (new_password !== new_password_confirm) {
+                alert("Erreur : Les nouveaux mots de passe ne correspondent pas.");
+                return;
+            }
+
+            try {
+                const response = await apiFetch('/auth/change-password/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ old_password, new_password, new_password_confirm })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('accessToken', data.access);
+                    localStorage.setItem('refreshToken', data.refresh);
+                    alert("Mot de passe modifié avec succès !");
+                    closeModal('change-password-modal');
+                } else {
+                    const err = await response.json();
+                    alert(`Erreur : ${JSON.stringify(err)}`);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur serveur lors du changement de mot de passe.");
+            }
         }
 
         // ================= MODAL UTILITIES =================

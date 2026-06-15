@@ -2,24 +2,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-    /* Color Palette - HSL (Harmonious Space Design) */
-    --bg-dark: hsl(222, 47%, 7%);
-    --bg-surface: rgba(30, 41, 59, 0.45);
-    --bg-surface-solid: hsl(223, 47%, 11%);
+    /* Color Palette - HSL (Harmonious Space Design) - Emerald & Gold */
+    --bg-dark: hsl(140, 35%, 6%);
+    --bg-surface: rgba(24, 38, 30, 0.45);
+    --bg-surface-solid: hsl(140, 35%, 9%);
     --border-color: rgba(255, 255, 255, 0.08);
     
-    --primary: hsl(250, 85%, 65%);
-    --primary-light: hsl(250, 85%, 75%);
-    --primary-grad: linear-gradient(135deg, hsl(250, 85%, 65%), hsl(190, 90%, 50%));
+    --primary: hsl(150, 80%, 42%);
+    --primary-light: hsl(150, 80%, 55%);
+    --primary-grad: linear-gradient(135deg, hsl(150, 80%, 42%), hsl(45, 95%, 52%));
     
-    --success: hsl(142, 70%, 45%);
-    --success-light: hsl(142, 70%, 90%);
-    --warning: hsl(38, 92%, 50%);
+    --success: hsl(150, 80%, 42%);
+    --success-light: hsl(150, 80%, 90%);
+    --warning: hsl(45, 95%, 50%);
     --danger: hsl(350, 89%, 60%);
     
     --text-primary: hsl(0, 0%, 100%);
-    --text-secondary: hsl(215, 20%, 65%);
-    --text-muted: hsl(215, 16%, 47%);
+    --text-secondary: hsl(145, 15%, 75%);
+    --text-muted: hsl(145, 12%, 55%);
     
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
@@ -50,9 +50,9 @@ body {
     overflow-x: hidden;
     min-height: 100vh;
     background-image: 
-        radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%),
-        radial-gradient(at 50% 0%, hsla(250,85%,65%,0.1) 0, transparent 50%),
-        radial-gradient(at 100% 100%, hsla(190,90%,50%,0.08) 0, transparent 50%);
+        radial-gradient(at 0% 0%, hsla(140, 35%, 6%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(150, 80%, 42%, 0.1) 0, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(45, 95%, 50%, 0.08) 0, transparent 50%);
     background-attachment: fixed;
 }
 

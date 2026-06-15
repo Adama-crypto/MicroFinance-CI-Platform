@@ -149,6 +149,19 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # ——— Throttling (anti brute-force) ———
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',       # Utilisateurs non connectés : 100 requêtes/jour
+        'user': '2000/day',      # Utilisateurs connectés : 2000 requêtes/jour
+        'login': '5/min',        # Tentatives de connexion : max 5/minute (anti brute-force)
+    },
+    # ——— Pagination par défaut ———
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
 
 # SimpleJWT Settings
